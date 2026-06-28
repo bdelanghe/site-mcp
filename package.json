@@ -1,0 +1,51 @@
+{
+  "name": "@bdelanghe/site-mcp",
+  "version": "0.1.0",
+  "description": "Read-only MCP server over robertdelanghe.dev's signed static API. Every response is verified against the site's Sigstore-signed sha256 manifest. Runs locally over stdio — no hosted server.",
+  "license": "MIT",
+  "author": "Robert DeLanghe",
+  "type": "module",
+  "bin": {
+    "site-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.23.8"
+  },
+  "optionalDependencies": {
+    "sigstore": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "sigstore",
+    "provenance",
+    "static-api",
+    "stdio"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bdelanghe/site-mcp.git"
+  },
+  "homepage": "https://robertdelanghe.dev"
+}
