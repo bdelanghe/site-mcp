@@ -1,0 +1,47 @@
+src/manifest.ts
+  s_98e316d0b3248a::t_35646e5b708a35 1-84
+test/manifest.test.ts
+  s_98e316d0b3248a::t_f99df8ddd9af4a 1-47
+src/signature.ts
+  s_98e316d0b3248a::t_d40dee1490ceb8 1-52
+test/api.test.ts
+  s_98e316d0b3248a::t_8d1ac63a13219c 1-84
+README.md
+  s_98e316d0b3248a::t_af1c3ea371f670 1-137
+src/api.ts
+  s_98e316d0b3248a::t_e26db26cee5f7f 1-129
+src/index.ts
+  s_98e316d0b3248a::t_534fb32e1b5564 1-25
+tsconfig.json
+  s_98e316d0b3248a::t_6300c291f2336f 1-18
+src/server.ts
+  s_98e316d0b3248a::t_a108e6d8256893 1-136
+package.json
+  s_98e316d0b3248a::t_1ce86dc6d0c813 1-51
+src/config.ts
+  s_98e316d0b3248a::t_dadae83640c5d2 1-60
+.gitignore
+  s_98e316d0b3248a::t_0d3ac337557dd7 1-5
+LICENSE
+  s_98e316d0b3248a::t_ce074ec80d6760 1-21
+src/catalog.ts
+  s_98e316d0b3248a::t_43f20ab9d86789 1-67
+package-lock.json
+  s_98e316d0b3248a::t_749a1321604129 1-2825
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "c955ae4447db1466c95016251f3bb7c71da73150",
+  "prompts": {},
+  "sessions": {
+    "s_98e316d0b3248a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8db980ee-eb6b-4866-832b-f795cef7f33c",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Robert DeLanghe <1240090+bdelanghe@users.noreply.github.com>"
+    }
+  }
+}
