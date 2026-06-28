@@ -1,6 +1,7 @@
 {
   "name": "@bdelanghe/site-mcp",
   "version": "0.1.0",
+  "mcpName": "io.github.bdelanghe/site-mcp",
   "description": "Read-only MCP server over robertdelanghe.dev's signed static API. Every response is verified against the site's Sigstore-signed sha256 manifest. Runs locally over stdio — no hosted server.",
   "license": "MIT",
   "author": "Robert DeLanghe",
