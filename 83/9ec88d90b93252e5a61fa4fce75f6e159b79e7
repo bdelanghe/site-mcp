@@ -1,0 +1,23 @@
+.github/workflows/publish-npm.yml
+  s_98e316d0b3248a::t_a9e7cd900b5355 1-52
+package.json
+  s_98e316d0b3248a::t_ab1d8fa7bba348 8-15,24-27
+README.md
+  s_98e316d0b3248a::t_14fa1ec1ce97e1 135-177
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "839ec88d90b93252e5a61fa4fce75f6e159b79e7",
+  "prompts": {},
+  "sessions": {
+    "s_98e316d0b3248a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8db980ee-eb6b-4866-832b-f795cef7f33c",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Robert DeLanghe <1240090+bdelanghe@users.noreply.github.com>"
+    }
+  }
+}
