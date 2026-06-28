@@ -1,0 +1,11 @@
+{
+  "name": "@bdelanghe/site-mcp",
+  "version": "0.1.0",
+  "license": "MIT",
+  "exports": "./dist/index.js",
+  "nodeModulesDir": "auto",
+  "publish": {
+    "include": ["dist", "README.md", "LICENSE", "deno.json"],
+    "exclude": [".github", "src", "test", "tsconfig.json"]
+  }
+}

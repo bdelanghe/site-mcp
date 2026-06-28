@@ -134,46 +134,88 @@ npm run typecheck
 
 ## Publishing
 
-This package is published to npm by the
-[`publish-npm.yml`](./.github/workflows/publish-npm.yml) workflow using npm
-**trusted publishing** (OIDC). There is **no `NPM_TOKEN`** — npm exchanges a
-short-lived GitHub Actions OIDC token for publish auth and attaches build
-[provenance](https://docs.npmjs.com/generating-provenance-statements)
-automatically. It needs npm ≥ 11.5 (the workflow upgrades npm to guarantee this).
+**One tag publishes the same version to three registries, mirrored.** Pushing a
+`v*` tag runs [`publish.yml`](./.github/workflows/publish.yml), which fans out to:
 
-### One-time setup (maintainer, on npmjs.com)
+| # | Registry | Identifier | Auth |
+| - | -------- | ---------- | ---- |
+| 1 | **npm** | `@bdelanghe/site-mcp` | trusted publishing (OIDC) + [provenance](https://docs.npmjs.com/generating-provenance-statements) |
+| 2 | **JSR** (mirror) | `@bdelanghe/site-mcp` | tokenless OIDC (`npx jsr publish`) |
+| 3 | **MCP Registry** | `io.github.bdelanghe/site-mcp` | GitHub-OIDC namespace auth (`mcp-publisher`) |
 
-Trusted publishing has to be authorized once on the registry side before the
-first tag will publish:
+There are **no long-lived secrets** — every registry authenticates with the
+job's short-lived GitHub Actions OIDC token (`id-token: write`). npm needs
+npm ≥ 11.5 (the workflow upgrades npm to guarantee this).
 
-1. Sign in to [npmjs.com](https://www.npmjs.com/) as an owner of the
-   `@bdelanghe` scope.
-2. Go to the package page for **`@bdelanghe/site-mcp`** → **Settings** →
-   **Trusted Publisher** (first publish: create the package, or do this from the
-   org/scope settings; for a brand-new package you may need to publish `0.1.0`
-   once manually, then switch to trusted publishing).
+> [!IMPORTANT]
+> **Versions must stay in sync.** The release version lives in **four** places
+> that must all match: `package.json`, `deno.json`, `server.json`, and the
+> `v<version>` git tag. The workflow's `verify` job hard-fails the whole release
+> on any mismatch, so npm and JSR can never drift apart. The MCP Registry also
+> requires `package.json` to carry `"mcpName": "io.github.bdelanghe/site-mcp"`
+> (it reads that field off the published npm package to prove ownership).
+
+The MCP Registry job runs **after** the npm job, because the registry verifies
+ownership by reading `mcpName` from the freshly-published npm package.
+
+### One-time setup (maintainer) — do these BEFORE the first tag
+
+These three registry-side authorizations only need to happen once. Two of the
+three (JSR, MCP Registry) are pure repo-link / OIDC — no tokens are minted.
+
+**(a) npm — Trusted Publisher** (on [npmjs.com](https://www.npmjs.com/))
+
+1. Sign in as an owner of the `@bdelanghe` scope.
+2. Open the package page for **`@bdelanghe/site-mcp`** → **Settings** →
+   **Trusted Publisher**. For a brand-new package you may need to publish `0.1.0`
+   once manually (or create the package), then switch to trusted publishing.
 3. Choose **GitHub Actions** and enter:
    - **Organization / user:** `bdelanghe`
    - **Repository:** `site-mcp`
-   - **Workflow filename:** `publish-npm.yml`
+   - **Workflow filename:** `publish.yml`  ← (was `publish-npm.yml`)
    - **Environment:** *(leave blank)*
-4. Save. No token is generated or stored anywhere.
+4. Save. No token is generated or stored anywhere. Ensure the package's
+   publishing-access policy allows automation/OIDC (trusted publishers satisfy 2FA).
 
-> Two-factor settings: ensure the package's publishing-access policy allows
-> automation/OIDC (trusted publishers satisfy 2FA). No granular access token is
-> required.
+**(b) JSR — create + link the package** (on [jsr.io](https://jsr.io/))
 
-### Cut a release
+1. Sign in to jsr.io with GitHub and create the package **`@bdelanghe/site-mcp`**
+   under the `@bdelanghe` scope.
+2. Open the package's **Settings** tab → under **GitHub Repository** enter
+   `bdelanghe/site-mcp` and click **Link**. Linking the repo is what enables
+   **tokenless OIDC publishing** from this workflow (same idea as npm's trusted
+   publisher). No token is created.
+
+**(c) MCP Registry — nothing to pre-authorize**
+
+The `io.github.bdelanghe/*` namespace is **auto-authorized via GitHub OIDC**:
+because this repo lives under `github.com/bdelanghe`, `mcp-publisher login
+github-oidc` proves ownership of the namespace from the Actions run itself.
+There is **no** registry-side claim/consent/linking step to do in advance — the
+first `publish.yml` run authenticates and registers the server on its own.
+(Package-ownership of the npm entry is proven separately by the `mcpName` field;
+see the note above.)
+
+### Cut a release (the single command)
 
 ```bash
-# bump the version in package.json (e.g. 0.1.0 → 0.1.1) first, commit, then:
-git tag v0.1.0
-git push origin v0.1.0
+# 1. Bump the version in ALL of: package.json, deno.json, server.json
+#    (and the package entry in server.json). Commit.
+# 2. Tag with the SAME version and push — this is the only command:
+git tag v0.1.0 && git push origin v0.1.0
 ```
 
-Pushing a `v*` tag triggers the workflow, which builds, tests, and runs
-`npm publish --provenance --access public`. You can also run it manually from
-the Actions tab via **workflow_dispatch**.
+That one `v*` tag triggers `publish.yml` → npm + JSR + MCP Registry, all at the
+same version. You can also run it from the Actions tab via **workflow_dispatch**
+(which reuses the `package.json` version in place of a tag).
+
+### Local dry-runs (verify without publishing)
+
+```bash
+npm pack --dry-run                                   # npm tarball contents
+npx --yes jsr publish --dry-run --allow-slow-types   # JSR (or: deno publish --dry-run --allow-slow-types)
+mcp-publisher validate ./server.json                 # MCP Registry schema check
+```
 
 ## License
 
