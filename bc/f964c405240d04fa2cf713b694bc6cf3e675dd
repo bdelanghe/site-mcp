@@ -1,0 +1,54 @@
+.github/workflows/publish.yml
+  s_98e316d0b3248a::t_eefe0a59dd76fb 6-7
+  s_399e6065f1b4a3::t_1657e18e0945d8 3,5,8-13,22-50,52,54-56,60,66-67,69,71-72,75,78-80,84-88,90,92-94,98-99,104-117,119,121-123,127-129,132-141
+server.json
+  s_98e316d0b3248a::t_406dd623c335e3 14
+  s_399e6065f1b4a3::t_fff5df5fad8609 2,4,6,17-26
+deno.json
+  s_98e316d0b3248a::t_a413fc25219af0 2
+  s_98e316d0b3248a::t_73759adb1ca86e 4-5
+  s_3afa8ea03cb772::t_40d21428358297 14-15
+package.json
+  s_98e316d0b3248a::t_cbe72c12215139 2
+  s_98e316d0b3248a::t_5bad3dfa914e1c 40
+  s_3afa8ea03cb772::t_183568c31f54ef 4
+README.md
+  s_98e316d0b3248a::t_901292803234a2 184
+  s_98e316d0b3248a::t_2f98f5d96d935d 199
+  s_98e316d0b3248a::t_2f44c9a6bb4d53 1,55,58-60,76,153-159,185-198
+  s_399e6065f1b4a3::t_a8304cee92140b 160-183,200-215,217-234
+package-lock.json
+  s_98e316d0b3248a::t_f320f0e0dd04e5 1-2340
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "bcf964c405240d04fa2cf713b694bc6cf3e675dd",
+  "prompts": {},
+  "sessions": {
+    "s_399e6065f1b4a3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a796dc6-3857-431d-90c5-9799f8d4865b",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Robert DeLanghe <oink_monocle_7d@icloud.com>"
+    },
+    "s_3afa8ea03cb772": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0e8b57ee-3d61-44b0-b33b-c3f276b478fa",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Robert DeLanghe <oink_monocle_7d@icloud.com>"
+    },
+    "s_98e316d0b3248a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8db980ee-eb6b-4866-832b-f795cef7f33c",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Robert DeLanghe <oink_monocle_7d@icloud.com>"
+    }
+  }
+}
