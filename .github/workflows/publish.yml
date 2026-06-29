@@ -3,8 +3,8 @@ name: publish
 # ONE tag -> THREE registries, mirrored.
 #
 # Pushing a `v*` tag (e.g. `v0.1.0`) publishes the SAME version to:
-#   1. npm  (@bdelanghe/site-mcp)        - trusted publishing (OIDC) + provenance
-#   2. JSR  (@bdelanghe/site-mcp)        - tokenless OIDC publish (mirror of npm)
+#   1. npm  (@bounded-systems/site-mcp)        - trusted publishing (OIDC) + provenance
+#   2. JSR  (@bounded-systems/site-mcp)        - tokenless OIDC publish (mirror of npm)
 #   3. MCP Registry (io.github.bdelanghe/site-mcp) - GitHub-OIDC namespace auth
 #
 # No long-lived secrets: every registry authenticates via the job's short-lived

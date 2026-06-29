@@ -1,32 +1,26 @@
 /**
- * Builds the read-only MCP server. Every resource read and tool call routes
- * through ApiClient.getVerified(), so nothing is returned that hasn't matched
- * the signed manifest. There are no write/mutating tools by design.
+ * Assemble robertdelanghe.dev's {@link StaticMcpSpec} (verbs + resource catalog
+ * + server identity) and hand it to the generic core. All the verified-fetch /
+ * manifest / Sigstore machinery and the VerbSpec → MCP projection live in
+ * `@bounded-systems/static-mcp`; this file is just the site's values.
  */
-import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import type { Config } from "./config.js";
-import { ApiClient, VerificationError, type VerifiedArtifact } from "./api.js";
+import {
+  ApiClient,
+  buildVerifiedStaticServer,
+  type Config,
+  type StaticDeps,
+  type StaticMcpSpec,
+  type VerifiedResource,
+} from "@bounded-systems/static-mcp";
 import {
   POST_URI_PREFIX,
-  STATIC_RESOURCES,
   postFile,
   slugFromPostUri,
+  STATIC_FILES,
 } from "./catalog.js";
+import { siteVerbs } from "./verbs.js";
 
-const PKG_VERSION = "0.1.0";
-
-function verificationMeta(a: VerifiedArtifact, signatureNote: string) {
-  return {
-    verification: {
-      path: a.verification.path,
-      source: a.url,
-      sha256: a.verification.actual,
-      matchedSignedManifest: true,
-      manifestSignature: signatureNote,
-    },
-  };
-}
+const PKG_VERSION = "0.2.0";
 
 interface PostItem {
   slug?: string;
@@ -34,103 +28,56 @@ interface PostItem {
   summary?: string;
 }
 
-export function buildServer(config: Config, client = new ApiClient(config)): McpServer {
-  const server = new McpServer(
-    { name: "site-mcp", version: PKG_VERSION },
-    {
+/** Build the full spec the core serves: site verbs + resources + identity. */
+export function buildSiteSpec(config: Config): StaticMcpSpec {
+  const resources: VerifiedResource[] = STATIC_FILES.map((r) => ({
+    uri: r.uri,
+    name: r.name,
+    description: r.description,
+    path: `${config.apiPrefix}/${r.file}`,
+  }));
+
+  return {
+    server: {
+      name: "site-mcp",
+      version: PKG_VERSION,
       instructions:
         `Read-only access to ${config.baseUrl}'s signed static API. Every ` +
         `resource and tool result is verified byte-for-byte against the site's ` +
         `Sigstore-signed sha256 manifest before being returned; a mismatch is an error.`,
     },
-  );
-
-  async function signatureNote(): Promise<string> {
-    const { signature } = await client.getManifest();
-    if (config.signatureMode === "off") return "not-checked (disabled)";
-    return signature.verified
-      ? "verified"
-      : `unverified (${signature.reason ?? "unknown"})`;
-  }
-
-  // ---- Static resources (one per api/v1 file) ----
-  for (const r of STATIC_RESOURCES) {
-    server.resource(
-      r.name,
-      r.uri,
-      { description: r.description, mimeType: "application/json" },
-      async (uri: URL) => {
-        const artifact = await client.getVerified(client.apiPath(r.file));
-        return {
-          contents: [
-            { uri: uri.href, mimeType: "application/json", text: artifact.text },
-          ],
-          _meta: verificationMeta(artifact, await signatureNote()),
-        };
-      },
-    );
-  }
-
-  // ---- Templated resource: individual posts ----
-  server.resource(
-    "post",
-    new ResourceTemplate(`${POST_URI_PREFIX}{slug}`, {
-      list: async () => {
-        const posts = await client.getVerified(client.apiPath("posts.json"));
-        const items = ((posts.json as { items?: PostItem[] }).items ?? []).filter(
-          (i) => typeof i.slug === "string",
-        );
-        return {
-          resources: items.map((i) => ({
+    verbs: siteVerbs,
+    resources,
+    resourceTemplates: [
+      {
+        name: "post",
+        template: `${POST_URI_PREFIX}{slug}`,
+        description: "A single blog post by slug.",
+        resolve: (uri: URL, deps: StaticDeps) => {
+          const slug = slugFromPostUri(uri.href);
+          return slug ? deps.apiPath(postFile(slug)) : undefined;
+        },
+        list: async (deps: StaticDeps) => {
+          const posts = await deps.client.getVerified(deps.apiPath("posts.json"));
+          const items = ((posts.json as { items?: PostItem[] }).items ?? []).filter(
+            (i) => typeof i.slug === "string",
+          );
+          return items.map((i) => ({
             uri: `${POST_URI_PREFIX}${i.slug}`,
             name: i.title ?? i.slug!,
             description: i.summary,
-            mimeType: "application/json",
-          })),
-        };
+          }));
+        },
       },
-    }),
-    { description: "A single blog post by slug.", mimeType: "application/json" },
-    async (uri: URL) => {
-      const slug = slugFromPostUri(uri.href);
-      if (!slug) throw new VerificationError(`invalid post URI: ${uri.href}`);
-      const artifact = await client.getVerified(client.apiPath(postFile(slug)));
-      return {
-        contents: [
-          { uri: uri.href, mimeType: "application/json", text: artifact.text },
-        ],
-        _meta: verificationMeta(artifact, await signatureNote()),
-      };
-    },
-  );
+    ],
+  };
+}
 
-  // ---- Tools (read-only) ----
-  const toolResult = async (artifact: VerifiedArtifact) => ({
-    content: [{ type: "text" as const, text: artifact.text }],
-    structuredContent: artifact.json as Record<string, unknown>,
-    _meta: verificationMeta(artifact, await signatureNote()),
-  });
-
-  server.tool(
-    "list_posts",
-    "List published blog posts (slug, title, summary, tags) from the signed posts feed.",
-    async () => toolResult(await client.getVerified(client.apiPath("posts.json"))),
-  );
-
-  server.tool(
-    "get_post",
-    "Fetch a single blog post by slug, verified against the signed manifest.",
-    { slug: z.string().min(1).describe("Post slug, e.g. agent-authored-code-drift") },
-    async ({ slug }: { slug: string }) =>
-      toolResult(await client.getVerified(client.apiPath(postFile(slug)))),
-  );
-
-  server.tool(
-    "get_conformance",
-    "Fetch the site's per-page DOM conformance / accessibility report.",
-    async () =>
-      toolResult(await client.getVerified(client.apiPath("conformance.json"))),
-  );
-
-  return server;
+/**
+ * Build (but do not connect) the site's MCP server. A test can inject a fake
+ * {@link ApiClient} (backed by an in-memory fetch) to exercise the wiring
+ * offline; production omits it and the core constructs a real one.
+ */
+export function buildServer(config: Config, client?: ApiClient) {
+  return buildVerifiedStaticServer(buildSiteSpec(config), config, client);
 }

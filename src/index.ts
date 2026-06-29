@@ -1,22 +1,33 @@
 #!/usr/bin/env node
 /**
- * Entry point: a local, read-only MCP server over robertdelanghe.dev's signed
- * static API, speaking the stdio transport. No network listener is opened — the
- * server is launched by an MCP client and talks over stdin/stdout.
+ * Entry point. Two surfaces from one verb set (see `@bounded-systems/verbspec`):
+ *   - `site-mcp` (no args)            → a read-only MCP server over stdio.
+ *   - `site-mcp <command> [args]`     → the same verbs as a CLI, e.g.
+ *       `site-mcp list_posts` · `site-mcp get_conformance` ·
+ *       `site-mcp get_post agent-authored-code-drift`
+ * Either way every byte returned is verified against robertdelanghe.dev's signed
+ * manifest. All machinery lives in `@bounded-systems/static-mcp`; this just
+ * supplies the site's config + spec and picks the surface.
  */
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { runStaticCli, serveVerifiedStaticMcp } from "@bounded-systems/static-mcp";
 import { resolveConfig } from "./config.js";
-import { buildServer } from "./server.js";
+import { buildSiteSpec } from "./server.js";
 
 async function main(): Promise<void> {
   const config = resolveConfig();
-  const server = buildServer(config);
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  // Log to stderr only — stdout is the MCP channel.
-  console.error(
-    `site-mcp ready (stdio) → ${config.baseUrl}; signature mode=${config.signatureMode}`,
-  );
+  const spec = buildSiteSpec(config);
+  const argv = process.argv.slice(2);
+
+  if (argv.length > 0) {
+    // CLI surface.
+    const { stdout, stderr, code } = await runStaticCli(spec, config, argv);
+    if (stdout) process.stdout.write(stdout.endsWith("\n") ? stdout : stdout + "\n");
+    if (stderr) process.stderr.write(stderr.endsWith("\n") ? stderr : stderr + "\n");
+    process.exit(code);
+  }
+
+  // MCP stdio surface (the default when launched by an MCP client).
+  await serveVerifiedStaticMcp(spec, config);
 }
 
 main().catch((err) => {

@@ -1,9 +1,15 @@
 {
-  "name": "@bdelanghe/site-mcp",
-  "version": "0.1.0",
+  "name": "@bounded-systems/site-mcp",
+  "version": "0.2.0",
   "license": "MIT",
   "exports": "./dist/index.js",
   "nodeModulesDir": "auto",
+  "imports": {
+    "zod": "npm:zod@^4.4.3",
+    "@modelcontextprotocol/sdk/": "npm:/@modelcontextprotocol/sdk@^1.29.0/",
+    "@bounded-systems/verbspec": "jsr:@bounded-systems/verbspec@^0.3.1",
+    "@bounded-systems/static-mcp": "jsr:@bounded-systems/static-mcp@^0.1.0"
+  },
   "publish": {
     "include": ["dist", "README.md", "LICENSE", "deno.json"],
     "exclude": [".github", "src", "test", "tsconfig.json"]
