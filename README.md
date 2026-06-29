@@ -157,7 +157,7 @@ npm run typecheck
 | - | -------- | ---------- | ---- |
 | 1 | **npm** | `@bounded-systems/site-mcp` | trusted publishing (OIDC) + [provenance](https://docs.npmjs.com/generating-provenance-statements) |
 | 2 | **JSR** (mirror) | `@bounded-systems/site-mcp` | tokenless OIDC (`npx jsr publish`) |
-| 3 | **MCP Registry** | `io.github.bdelanghe/site-mcp` | GitHub-OIDC namespace auth (`mcp-publisher`) |
+| 3 | **MCP Registry** | `io.github.bounded-systems/site-mcp` | GitHub-OIDC namespace auth (`mcp-publisher`) |
 
 There are **no long-lived secrets** — every registry authenticates with the
 job's short-lived GitHub Actions OIDC token (`id-token: write`). npm needs
@@ -168,7 +168,7 @@ npm ≥ 11.5 (the workflow upgrades npm to guarantee this).
 > that must all match: `package.json`, `deno.json`, `server.json`, and the
 > `v<version>` git tag. The workflow's `verify` job hard-fails the whole release
 > on any mismatch, so npm and JSR can never drift apart. The MCP Registry also
-> requires `package.json` to carry `"mcpName": "io.github.bdelanghe/site-mcp"`
+> requires `package.json` to carry `"mcpName": "io.github.bounded-systems/site-mcp"`
 > (it reads that field off the published npm package to prove ownership).
 
 The MCP Registry job runs **after** the npm job, because the registry verifies
@@ -186,7 +186,7 @@ three (JSR, MCP Registry) are pure repo-link / OIDC — no tokens are minted.
    **Trusted Publisher**. For a brand-new package you may need to publish `0.1.0`
    once manually (or create the package), then switch to trusted publishing.
 3. Choose **GitHub Actions** and enter:
-   - **Organization / user:** `bdelanghe`
+   - **Organization / user:** `bounded-systems`
    - **Repository:** `site-mcp`
    - **Workflow filename:** `publish.yml`  ← (was `publish-npm.yml`)
    - **Environment:** *(leave blank)*
@@ -198,14 +198,14 @@ three (JSR, MCP Registry) are pure repo-link / OIDC — no tokens are minted.
 1. Sign in to jsr.io with GitHub and create the package **`@bounded-systems/site-mcp`**
    under the `@bounded-systems` scope.
 2. Open the package's **Settings** tab → under **GitHub Repository** enter
-   `bdelanghe/site-mcp` and click **Link**. Linking the repo is what enables
+   `bounded-systems/site-mcp` and click **Link**. Linking the repo is what enables
    **tokenless OIDC publishing** from this workflow (same idea as npm's trusted
    publisher). No token is created.
 
 **(c) MCP Registry — nothing to pre-authorize**
 
-The `io.github.bdelanghe/*` namespace is **auto-authorized via GitHub OIDC**:
-because this repo lives under `github.com/bdelanghe`, `mcp-publisher login
+The `io.github.bounded-systems/*` namespace is **auto-authorized via GitHub OIDC**:
+because this repo lives under `github.com/bounded-systems`, `mcp-publisher login
 github-oidc` proves ownership of the namespace from the Actions run itself.
 There is **no** registry-side claim/consent/linking step to do in advance — the
 first `publish.yml` run authenticates and registers the server on its own.

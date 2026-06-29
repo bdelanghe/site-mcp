@@ -1,7 +1,7 @@
 {
   "name": "@bounded-systems/site-mcp",
   "version": "0.2.0",
-  "mcpName": "io.github.bdelanghe/site-mcp",
+  "mcpName": "io.github.bounded-systems/site-mcp",
   "description": "Read-only MCP server over robertdelanghe.dev's signed static API. A thin implementation of @bounded-systems/static-mcp: the site's verbs + resource catalog + config, served as a Sigstore-verified static-response MCP server over stdio.",
   "license": "MIT",
   "author": "Robert DeLanghe",
@@ -58,7 +58,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bdelanghe/site-mcp.git"
+    "url": "git+https://github.com/bounded-systems/site-mcp.git"
   },
   "homepage": "https://robertdelanghe.dev"
 }

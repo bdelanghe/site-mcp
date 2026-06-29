@@ -5,7 +5,7 @@ name: publish
 # Pushing a `v*` tag (e.g. `v0.1.0`) publishes the SAME version to:
 #   1. npm  (@bounded-systems/site-mcp)        - trusted publishing (OIDC) + provenance
 #   2. JSR  (@bounded-systems/site-mcp)        - tokenless OIDC publish (mirror of npm)
-#   3. MCP Registry (io.github.bdelanghe/site-mcp) - GitHub-OIDC namespace auth
+#   3. MCP Registry (io.github.bounded-systems/site-mcp) - GitHub-OIDC namespace auth
 #
 # No long-lived secrets: every registry authenticates via the job's short-lived
 # GitHub Actions OIDC token (`id-token: write`). The `verify` job hard-fails the
@@ -111,7 +111,7 @@ jobs:
         run: npx --yes jsr publish --allow-slow-types
 
   # ---------------------------------------------------------------------------
-  # 3. MCP Registry — GitHub-OIDC namespace auth (io.github.bdelanghe/*).
+  # 3. MCP Registry — GitHub-OIDC namespace auth (io.github.bounded-systems/*).
   #    Runs AFTER npm: the registry verifies package ownership by reading the
   #    `mcpName` field of the just-published npm package.
   # ---------------------------------------------------------------------------
@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # GitHub OIDC -> io.github.bdelanghe/* namespace
+      id-token: write # GitHub OIDC -> io.github.bounded-systems/* namespace
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -134,7 +134,7 @@ jobs:
       - name: Validate server.json against the published schema
         run: ./mcp-publisher validate ./server.json
 
-      - name: Authenticate (GitHub OIDC; auto-authes io.github.bdelanghe/*)
+      - name: Authenticate (GitHub OIDC; auto-authes io.github.bounded-systems/*)
         run: ./mcp-publisher login github-oidc
 
       - name: Publish to the MCP Registry
