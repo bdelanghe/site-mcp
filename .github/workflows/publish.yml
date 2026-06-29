@@ -112,11 +112,14 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # 3. MCP Registry — GitHub-OIDC namespace auth (io.github.bounded-systems/*).
-  #    Runs AFTER npm: the registry verifies package ownership by reading the
-  #    `mcpName` field of the just-published npm package.
+  #    Decoupled from the `npm` job: the registry verifies package ownership by
+  #    reading the `mcpName` field of the ALREADY-published npm package, so it
+  #    does not require this run's npm job to succeed (npm trusted publishing is
+  #    not configured in CI). Trigger standalone via `workflow_dispatch` to list
+  #    or re-list once the npm package exists.
   # ---------------------------------------------------------------------------
   mcp-registry:
-    needs: [verify, npm]
+    needs: verify
     runs-on: ubuntu-latest
     permissions:
       contents: read
