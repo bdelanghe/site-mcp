@@ -1,4 +1,4 @@
-# @bdelanghe/site-mcp
+# @bounded-systems/site-mcp
 
 A **local, read-only [MCP](https://modelcontextprotocol.io) server** (and a
 matching CLI) over [robertdelanghe.dev](https://robertdelanghe.dev)'s **signed
@@ -52,12 +52,12 @@ that one line to your npm config.)
 
 ```bash
 # MCP server over stdio (what an MCP client launches):
-npx -y @bdelanghe/site-mcp
+npx -y @bounded-systems/site-mcp
 
 # CLI — the SAME verbs, printing the verified JSON:
-npx -y @bdelanghe/site-mcp list_posts
-npx -y @bdelanghe/site-mcp get_conformance
-npx -y @bdelanghe/site-mcp get_post agent-authored-code-drift
+npx -y @bounded-systems/site-mcp list_posts
+npx -y @bounded-systems/site-mcp get_conformance
+npx -y @bounded-systems/site-mcp get_post agent-authored-code-drift
 ```
 
 The MCP server logs a readiness line to **stderr** (stdout is the MCP channel):
@@ -73,7 +73,7 @@ site-mcp ready (stdio) → https://robertdelanghe.dev; signature mode=off
   "mcpServers": {
     "robertdelanghe": {
       "command": "npx",
-      "args": ["-y", "@bdelanghe/site-mcp"],
+      "args": ["-y", "@bounded-systems/site-mcp"],
       "env": { "SITE_MCP_SIGNATURE_MODE": "warn" }
     }
   }
@@ -150,12 +150,88 @@ npm run typecheck
 
 ## Publishing
 
-Mirror-published by [`publish.yml`](./.github/workflows/publish.yml) on a `v*`
-tag, all keyless OIDC (no stored tokens):
+**One tag publishes the same version to three registries, mirrored.** Pushing a
+`v*` tag runs [`publish.yml`](./.github/workflows/publish.yml), which fans out to:
 
-- **npm** — trusted publishing + provenance (`@bdelanghe/site-mcp`).
-- **JSR** — `deno publish` (`@bdelanghe/site-mcp`); see [`deno.json`](./deno.json).
-- **MCP registry** — `mcp-publisher` from [`server.json`](./server.json).
+| # | Registry | Identifier | Auth |
+| - | -------- | ---------- | ---- |
+| 1 | **npm** | `@bounded-systems/site-mcp` | trusted publishing (OIDC) + [provenance](https://docs.npmjs.com/generating-provenance-statements) |
+| 2 | **JSR** (mirror) | `@bounded-systems/site-mcp` | tokenless OIDC (`npx jsr publish`) |
+| 3 | **MCP Registry** | `io.github.bdelanghe/site-mcp` | GitHub-OIDC namespace auth (`mcp-publisher`) |
+
+There are **no long-lived secrets** — every registry authenticates with the
+job's short-lived GitHub Actions OIDC token (`id-token: write`). npm needs
+npm ≥ 11.5 (the workflow upgrades npm to guarantee this).
+
+> [!IMPORTANT]
+> **Versions must stay in sync.** The release version lives in **four** places
+> that must all match: `package.json`, `deno.json`, `server.json`, and the
+> `v<version>` git tag. The workflow's `verify` job hard-fails the whole release
+> on any mismatch, so npm and JSR can never drift apart. The MCP Registry also
+> requires `package.json` to carry `"mcpName": "io.github.bdelanghe/site-mcp"`
+> (it reads that field off the published npm package to prove ownership).
+
+The MCP Registry job runs **after** the npm job, because the registry verifies
+ownership by reading `mcpName` from the freshly-published npm package.
+
+### One-time setup (maintainer) — do these BEFORE the first tag
+
+These three registry-side authorizations only need to happen once. Two of the
+three (JSR, MCP Registry) are pure repo-link / OIDC — no tokens are minted.
+
+**(a) npm — Trusted Publisher** (on [npmjs.com](https://www.npmjs.com/))
+
+1. Sign in as an owner of the `@bounded-systems` scope.
+2. Open the package page for **`@bounded-systems/site-mcp`** → **Settings** →
+   **Trusted Publisher**. For a brand-new package you may need to publish `0.1.0`
+   once manually (or create the package), then switch to trusted publishing.
+3. Choose **GitHub Actions** and enter:
+   - **Organization / user:** `bdelanghe`
+   - **Repository:** `site-mcp`
+   - **Workflow filename:** `publish.yml`  ← (was `publish-npm.yml`)
+   - **Environment:** *(leave blank)*
+4. Save. No token is generated or stored anywhere. Ensure the package's
+   publishing-access policy allows automation/OIDC (trusted publishers satisfy 2FA).
+
+**(b) JSR — create + link the package** (on [jsr.io](https://jsr.io/))
+
+1. Sign in to jsr.io with GitHub and create the package **`@bounded-systems/site-mcp`**
+   under the `@bounded-systems` scope.
+2. Open the package's **Settings** tab → under **GitHub Repository** enter
+   `bdelanghe/site-mcp` and click **Link**. Linking the repo is what enables
+   **tokenless OIDC publishing** from this workflow (same idea as npm's trusted
+   publisher). No token is created.
+
+**(c) MCP Registry — nothing to pre-authorize**
+
+The `io.github.bdelanghe/*` namespace is **auto-authorized via GitHub OIDC**:
+because this repo lives under `github.com/bdelanghe`, `mcp-publisher login
+github-oidc` proves ownership of the namespace from the Actions run itself.
+There is **no** registry-side claim/consent/linking step to do in advance — the
+first `publish.yml` run authenticates and registers the server on its own.
+(Package-ownership of the npm entry is proven separately by the `mcpName` field;
+see the note above.)
+
+### Cut a release (the single command)
+
+```bash
+# 1. Bump the version in ALL of: package.json, deno.json, server.json
+#    (and the package entry in server.json). Commit.
+# 2. Tag with the SAME version and push — this is the only command:
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+That one `v*` tag triggers `publish.yml` → npm + JSR + MCP Registry, all at the
+same version. You can also run it from the Actions tab via **workflow_dispatch**
+(which reuses the `package.json` version in place of a tag).
+
+### Local dry-runs (verify without publishing)
+
+```bash
+npm pack --dry-run                                   # npm tarball contents
+npx --yes jsr publish --dry-run --allow-slow-types   # JSR (or: deno publish --dry-run --allow-slow-types)
+mcp-publisher validate ./server.json                 # MCP Registry schema check
+```
 
 > site-mcp depends on `@bounded-systems/static-mcp`; **publish the core first**
 > (its own `v*` tag → JSR + npm), then cut site-mcp's tag.

@@ -1,6 +1,7 @@
 {
-  "name": "@bdelanghe/site-mcp",
+  "name": "@bounded-systems/site-mcp",
   "version": "0.2.0",
+  "mcpName": "io.github.bdelanghe/site-mcp",
   "description": "Read-only MCP server over robertdelanghe.dev's signed static API. A thin implementation of @bounded-systems/static-mcp: the site's verbs + resource catalog + config, served as a Sigstore-verified static-response MCP server over stdio.",
   "license": "MIT",
   "author": "Robert DeLanghe",
@@ -36,7 +37,7 @@
     "test": "node --import tsx --test test/*.test.ts"
   },
   "dependencies": {
-    "@bounded-systems/static-mcp": "^0.1.0",
+    "@bounded-systems/static-mcp": "npm:@jsr/bounded-systems__static-mcp@^0.1.0",
     "@bounded-systems/verbspec": "npm:@jsr/bounded-systems__verbspec@^0.3.1",
     "zod": "^4.4.3"
   },

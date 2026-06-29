@@ -1,23 +1,29 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.bdelanghe/site-mcp",
-  "description": "Read-only, Sigstore-verified MCP server over robertdelanghe.dev's signed static API.",
+  "description": "Read-only MCP server over robertdelanghe.dev's Sigstore-verified static API (stdio).",
   "version": "0.2.0",
+  "websiteUrl": "https://robertdelanghe.dev",
   "repository": {
     "url": "https://github.com/bdelanghe/site-mcp",
     "source": "github"
   },
-  "websiteUrl": "https://robertdelanghe.dev",
   "packages": [
     {
       "registryType": "npm",
-      "registryBaseUrl": "https://registry.npmjs.org",
-      "identifier": "@bdelanghe/site-mcp",
+      "identifier": "@bounded-systems/site-mcp",
       "version": "0.2.0",
       "runtimeHint": "npx",
-      "transport": {
-        "type": "stdio"
-      }
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "SITE_MCP_SIGNATURE_MODE",
+          "description": "Manifest Sigstore signature check: off | warn | require.",
+          "isRequired": false,
+          "isSecret": false,
+          "default": "off"
+        }
+      ]
     }
   ]
 }
