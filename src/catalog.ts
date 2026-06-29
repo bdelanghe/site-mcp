@@ -1,18 +1,16 @@
 /**
- * The fixed set of static resources the API exposes (mirrors openapi.json).
- * Each entry maps a stable MCP resource URI to its api/v1 filename.
+ * The site's resource catalog VALUES (mirrors openapi.json): one stable MCP
+ * resource URI per api/v1 file, plus the templated post family. These are the
+ * site-specific descriptors the generic core projects to MCP resources.
  */
-export interface StaticResource {
-  /** MCP resource URI. */
+
+/** The fixed api/v1 files exposed as `site://…` resources. */
+export const STATIC_FILES: {
   uri: string;
-  /** Human-readable name. */
   name: string;
-  /** Filename under api/v1. */
   file: string;
   description: string;
-}
-
-export const STATIC_RESOURCES: StaticResource[] = [
+}[] = [
   {
     uri: "site://profile",
     name: "profile",
