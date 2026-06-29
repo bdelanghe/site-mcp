@@ -1,0 +1,49 @@
+test/server.test.ts
+  s_98e316d0b3248a::t_aa0603dd4f6b22 1-103,109-121
+  s_98e316d0b3248a::t_27e2d8b6703b99 104-108
+scripts/headless-check.mjs
+  s_98e316d0b3248a::t_98a95bc09134d1 1-35
+.github/workflows/publish.yml
+  s_98e316d0b3248a::t_936415df6987f5 1-72
+src/catalog.ts
+  s_98e316d0b3248a::t_908ae63eb0d634 2-4,6-8,13
+package.json
+  s_98e316d0b3248a::t_5e0e96b0c1b699 3-4,40-41,44,52
+  s_98e316d0b3248a::t_c27aefa18e5f11 39
+test/cli.test.ts
+  s_98e316d0b3248a::t_33f716dac7eac0 1-78
+deno.json
+  s_98e316d0b3248a::t_113cf9f58e6f54 1-30
+README.md
+  s_98e316d0b3248a::t_764e33588900d9 3-5,11,17,19-44,48-51,54,57-60,63,77,95-97,99,102,105,107-108,113-130,145,147,153-154,156-158,160-161
+src/verbs.ts
+  s_98e316d0b3248a::t_345e92a8f64da9 1-27,31-40
+  s_98e316d0b3248a::t_013e818fa1c6a6 28-30
+src/config.ts
+  s_98e316d0b3248a::t_e5e890a2371fe9 2-6,8,10,12,20-21,33
+src/index.ts
+  s_98e316d0b3248a::t_c8f5e4474c01db 14
+  s_98e316d0b3248a::t_90380247110557 3-10,12,18-30
+.npmrc
+  s_98e316d0b3248a::t_69f5dd960c1d26 1
+src/server.ts
+  s_98e316d0b3248a::t_937437b7347e2f 2-5,7-14,19,21,23,31-43,49-65,69-70,72-74,76-82
+server.json
+  s_98e316d0b3248a::t_b34742bbe0f581 1-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "ec1d3747e03d5551857b80ba4a01656a2057eda4",
+  "prompts": {},
+  "sessions": {
+    "s_98e316d0b3248a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8db980ee-eb6b-4866-832b-f795cef7f33c",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Robert DeLanghe <oink_monocle_7d@icloud.com>"
+    }
+  }
+}
